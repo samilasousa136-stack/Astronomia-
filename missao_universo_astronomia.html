@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Missão Universo — Jogo de Astronomia</title>
+<style>
+:root{--bg:#080d25;--panel:#121b3b;--panel2:#1a2852;--cyan:#69e2f2;--gold:#ffd166;--white:#f4f7ff;--muted:#b9c5e8;--pink:#ff8fc7}
+*{box-sizing:border-box} body{margin:0;min-height:100vh;font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:var(--white);background:radial-gradient(circle at 15% 15%,#25376b 0,transparent 28%),radial-gradient(circle at 85% 80%,#35205d 0,transparent 30%),var(--bg);padding:22px}
+.wrap{max-width:850px;margin:auto}.top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:18px}.brand{font-weight:800;letter-spacing:.08em;color:var(--cyan)}.pill{border:1px solid #435482;border-radius:999px;padding:7px 12px;color:var(--muted);font-size:.85rem}
+.hero,.game,.result{background:linear-gradient(145deg,rgba(26,40,82,.97),rgba(14,22,52,.97));border:1px solid #344675;border-radius:24px;padding:clamp(20px,5vw,38px);box-shadow:0 18px 55px #0005}
+.planet{font-size:3.3rem}.eyebrow{color:var(--cyan);font-size:.78rem;font-weight:800;letter-spacing:.15em;text-transform:uppercase}h1{font-size:clamp(2rem,6vw,3.4rem);line-height:1.04;margin:10px 0}h2{margin:8px 0 12px;font-size:1.5rem}p{color:var(--muted);line-height:1.6}.levels{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:24px 0}.level{background:#0e1735;border:1px solid #3a4b79;border-radius:16px;padding:14px;text-align:left}.level b{display:block;color:var(--gold);margin-bottom:5px}.level span{font-size:.86rem;color:var(--muted)}
+button{font:inherit;cursor:pointer}.primary{background:linear-gradient(90deg,#56d9ed,#8ba8ff);color:#07132d;border:0;padding:13px 22px;border-radius:13px;font-weight:850}.primary:hover{filter:brightness(1.08)}.answers{display:grid;gap:11px;margin:22px 0}.answer{background:#0d1736;border:1px solid #3b4d7e;color:var(--white);border-radius:14px;padding:14px 16px;text-align:left;transition:.15s}.answer:hover:not(:disabled){border-color:var(--cyan);transform:translateY(-1px)}.answer.correct{border-color:#5ee0ad;background:#123d3c}.answer.wrong{border-color:#ff8e9b;background:#48253d}.answer:disabled{cursor:default}.meta{display:flex;justify-content:space-between;color:var(--muted);font-size:.9rem}.bar{height:8px;background:#29385f;border-radius:20px;overflow:hidden;margin:14px 0 22px}.bar>div{height:100%;background:linear-gradient(90deg,var(--cyan),#a9a5ff);width:0;transition:width .25s}.feedback{padding:13px 15px;border-radius:13px;background:#0d1736;color:var(--muted);min-height:54px;line-height:1.5}.feedback strong{color:var(--white)}.next{margin-top:15px}.hidden{display:none}.result{text-align:center}.score{font-size:3.5rem;font-weight:900;color:var(--gold)}.footer{text-align:center;color:#8999c8;font-size:.8rem;margin:18px}
+@media(max-width:600px){body{padding:12px}.levels{grid-template-columns:1fr}.top{align-items:flex-start}.pill{font-size:.75rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <div class="top"><div class="brand">✦ MISSÃO UNIVERSO</div><div class="pill">Astronomia • Ensino Médio</div></div>
+ <section class="hero" id="intro">
+  <div class="planet">🪐</div><div class="eyebrow">Uma jornada pelo cosmos</div>
+  <h1>Você está pronto para explorar o Universo?</h1>
+  <p>Responda aos desafios, descubra curiosidades e acumule pontos nesta missão de Astronomia. O jogo reúne conteúdos adequados aos três anos do Ensino Médio.</p>
+  <div class="levels">
+   <div class="level"><b>🚀 Nível 1</b><span>Terra, Lua, movimentos e estações do ano</span></div>
+   <div class="level"><b>🌞 Nível 2</b><span>Sistema Solar, gravitação e estrelas</span></div>
+   <div class="level"><b>🌌 Nível 3</b><span>Galáxias, evolução estelar e Universo</span></div>
+  </div>
+  <button class="primary" id="start">Iniciar missão →</button>
+ </section>
+ <section class="game hidden" id="game">
+  <div class="meta"><span id="levelLabel">Nível 1</span><span id="scoreLabel">⭐ 0 pontos</span></div>
+  <div class="bar"><div id="progress"></div></div>
+  <div class="eyebrow" id="topic">Terra e movimentos</div>
+  <h2 id="question"></h2>
+  <div class="answers" id="answers"></div>
+  <div class="feedback" id="feedback">Escolha uma alternativa para continuar.</div>
+  <button class="primary next hidden" id="next">Próximo desafio →</button>
+ </section>
+ <section class="result hidden" id="result">
+  <div class="planet">🏆</div><div class="eyebrow">Missão concluída</div><h1>Exploração finalizada!</h1>
+  <div class="score" id="finalScore">0/120</div>
+  <h2 id="message"></h2><p id="summary"></p>
+  <button class="primary" id="again">Jogar novamente ↻</button>
+ </section>
+ <div class="footer">Aprender Astronomia é ampliar nosso olhar sobre o Universo.</div>
+</div>
+<script>
+const questions=[
+{level:1,topic:"Terra e seus movimentos",q:"Qual movimento da Terra, com duração aproximada de 24 horas, está relacionado à alternância entre dia e noite?",a:["Translação","Rotação","Precessão","Revolução lunar"],c:1,e:"A rotação é o movimento da Terra em torno de seu próprio eixo. A iluminação solar atinge diferentes regiões ao longo desse movimento."},
+{level:1,topic:"Estações do ano",q:"O principal fator responsável pelas estações do ano é:",a:["A variação da distância entre a Terra e o Sol","A inclinação do eixo terrestre combinada com a translação","A mudança do tamanho do Sol","A sombra da Lua sobre a Terra"],c:1,e:"A inclinação do eixo terrestre faz variar a incidência de luz solar nos hemisférios durante a translação."},
+{level:1,topic:"Fases da Lua",q:"As fases da Lua acontecem porque:",a:["A Lua produz diferentes quantidades de luz","A sombra da Terra cobre a Lua todos os dias","Vemos diferentes porções da face lunar iluminada pelo Sol","As nuvens escondem parte da Lua"],c:2,e:"A Lua não emite luz própria: reflete a luz solar. A geometria entre Sol, Terra e Lua muda a porção iluminada que observamos."},
+{level:1,topic:"Eclipses",q:"Em um eclipse solar, qual é a configuração aproximada dos astros?",a:["Sol–Lua–Terra","Sol–Terra–Lua","Lua–Sol–Terra","Terra–Sol–Lua"],c:0,e:"No eclipse solar, a Lua fica entre o Sol e a Terra e pode projetar sua sombra sobre uma região terrestre."},
+{level:2,topic:"Sistema Solar",q:"Qual planeta é conhecido por possuir um sistema de anéis muito destacado?",a:["Marte","Vênus","Saturno","Mercúrio"],c:2,e:"Saturno possui anéis extensos e brilhantes, formados principalmente por partículas de gelo e rocha."},
+{level:2,topic:"Gravitação",q:"O que mantém os planetas em órbita ao redor do Sol?",a:["O vento solar","A força gravitacional","O magnetismo dos planetas","A pressão da luz"],c:1,e:"A atração gravitacional do Sol, junto ao movimento dos planetas, resulta em suas órbitas."},
+{level:2,topic:"Estrelas",q:"Qual é a principal fonte de energia das estrelas como o Sol?",a:["Combustão de oxigênio","Fissão nuclear de ferro","Fusão nuclear","Energia elétrica"],c:2,e:"No núcleo do Sol, núcleos de hidrogênio se fundem formando hélio, liberando energia."},
+{level:2,topic:"Escalas astronômicas",q:"Por que os astrônomos utilizam a unidade ano-luz?",a:["Para medir o brilho das estrelas","Para medir grandes distâncias","Para indicar a idade de planetas","Para medir a massa de galáxias"],c:1,e:"Ano-luz é uma unidade de distância: corresponde ao caminho percorrido pela luz no vácuo durante um ano."},
+{level:3,topic:"Galáxias",q:"Em qual galáxia está localizado o Sistema Solar?",a:["Andrômeda","Via Láctea","Grande Nuvem de Magalhães","Galáxia do Sombrero"],c:1,e:"O Sistema Solar está em um dos braços da Via Láctea, uma galáxia espiral barrada."},
+{level:3,topic:"Evolução estelar",q:"O destino final de uma estrela depende principalmente de:",a:["Sua cor vista da Terra","Sua massa inicial","A distância até a Lua","O número de planetas que possui"],c:1,e:"A massa inicial influencia toda a evolução da estrela e seu possível remanescente: anã branca, estrela de nêutrons ou buraco negro."},
+{level:3,topic:"Cosmologia",q:"A teoria do Big Bang descreve:",a:["Uma explosão comum em um ponto do espaço vazio","A expansão do próprio Universo a partir de um estado inicial quente e denso","A formação apenas do Sistema Solar","O nascimento de uma única galáxia"],c:1,e:"O modelo do Big Bang descreve a evolução do Universo, que se expande e esfria desde um estado inicial extremamente quente e denso."},
+{level:3,topic:"Observação do Universo",q:"Quando observamos uma galáxia muito distante, geralmente a vemos como ela era:",a:["No futuro","No instante exato em que olhamos, sem atraso","No passado, pois a luz levou tempo para chegar até nós","Apenas durante um eclipse"],c:2,e:"A luz tem velocidade finita. Quanto maior a distância, mais tempo ela leva para chegar, permitindo observar objetos como eram no passado."}
+];
+let index=0,score=0,answered=false;
+const $=id=>document.getElementById(id);
+function showQuestion(){
+ answered=false;const x=questions[index];
+ $("levelLabel").textContent=`Nível ${x.level} • Desafio ${index+1}/12`;
+ $("scoreLabel").textContent=`⭐ ${score} pontos`;
+ $("topic").textContent=x.topic;$("question").textContent=x.q;
+ $("progress").style.width=(index/questions.length*100)+"%";
+ $("feedback").textContent="Escolha uma alternativa para continuar.";
+ $("next").classList.add("hidden");$("answers").innerHTML="";
+ x.a.forEach((option,i)=>{const b=document.createElement("button");b.className="answer";b.textContent=String.fromCharCode(65+i)+") "+option;b.onclick=()=>choose(i);$("answers").appendChild(b)});
+}
+function choose(i){
+ if(answered)return;answered=true;const x=questions[index];const buttons=[...$("answers").children];
+ buttons.forEach((b,j)=>{b.disabled=true;if(j===x.c)b.classList.add("correct");if(j===i&&i!==x.c)b.classList.add("wrong")});
+ if(i===x.c){score+=10;$("feedback").innerHTML="<strong>Resposta correta! +10 pontos.</strong> "+x.e}
+ else{$("feedback").innerHTML="<strong>Não foi dessa vez.</strong> A resposta correta é: "+x.a[x.c]+". "+x.e}
+ $("scoreLabel").textContent=`⭐ ${score} pontos`;$("next").textContent=index===questions.length-1?"Ver resultado →":"Próximo desafio →";$("next").classList.remove("hidden");
+}
+$("start").onclick=()=>{$("intro").classList.add("hidden");$("result").classList.add("hidden");$("game").classList.remove("hidden");index=0;score=0;showQuestion()};
+$("next").onclick=()=>{index++;if(index<questions.length)showQuestion();else finish()};
+function finish(){$("game").classList.add("hidden");$("result").classList.remove("hidden");$("finalScore").textContent=score+"/120";$("message").textContent=score>=100?"Você é um explorador cósmico! 🌟":score>=70?"Muito bem, missão quase perfeita!":"Continue explorando: o Universo tem muito a ensinar!";$("summary").textContent=`Você acertou ${score/10} de 12 questões. Revise as explicações após cada resposta e tente novamente para melhorar sua pontuação.`}
+$("again").onclick=()=>{$("result").classList.add("hidden");$("intro").classList.remove("hidden")};
+</script>
+</body></html>
